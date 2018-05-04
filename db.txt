@@ -1,6 +1,7 @@
 system("pocitac",["pocitacova jednotka"],["monitor","klavesnica"]).
 
-podsystem("pocitacova jednotka",["disk1","disk2"]).
+podsystem("pocitacova jednotka",["disk","disk"]).
 
 suciastka("monitor",10).
 suciastka("klavesnica",5).
+suciastka("disk",12).

@@ -41,8 +41,8 @@ menu:-
 % vykonanie vybranej moznosti
 % vykonaj(+Code)
 
-vykonaj(49):-citaj('db.txt'),!.
-%vykonaj(50):-zapis('db.txt'),!. %ocakava sa vlozenie mena suboru!
+vykonaj(49):-citaj,!.
+vykonaj(50):-zapis,!. %ocakava sa vlozenie mena suboru!
 %vykonaj(51):-vypis,!.
 vykonaj(57):-!.
 vykonaj(_):-writeln('Pouzivaj len urcene znaky!').
@@ -52,11 +52,14 @@ vykonaj(_):-writeln('Pouzivaj len urcene znaky!').
 % Sluzi na citanie zo suboru, najprv vyprazdni existujucu DB.
 % citaj(+Subor)
 
-citaj(S):-
+citaj:-
+	read_string(_),
+	writeln("Subor: "),
+	read_atom(Subor),
 	abolish(system/3),
 	abolish(podsystem/2),
 	abolish(suciastka/2),
-	see(S),
+	see(Subor),
 	repeat,
 	read(Term),
 	(
@@ -72,14 +75,16 @@ citaj(S):-
 % Sluzi na zapis textoveho suboru.
 % zapis(+Subor)
 
-%zapis(S):-
-%	tell(S),
-%	zakaznik(Meno,Priezvisko,Adresa,Objednavka),
-%	writeq(zakaznik(Meno,Priezvisko,Adresa,Objednavka)),
-%	write('.'),
-%	nl,
-%	fail.
-%zapis(_):-told.
+zapis:-
+	writeln("Subor: "),
+	read_atom(Subor),
+	tell(Subor),
+	system(Meno,[Podsystemy],[Suciastky]),
+	writeq(system(Meno,[Podsystemy],[Suciastky])),
+	write('.'),
+	nl,
+	fail.
+zapis:-told.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Sluzi na vypis
@@ -105,31 +110,31 @@ citaj(S):-
 % Predikat, ktory nacita string aj ked tam je velke zaciatocne pismeno
 % read_string(?String) argument je ale vhodnejsie pouzivat ako vystupny
 
-%read_string(String):-
-%	current_input(Input),
-%	read_line_to_codes(Input,Codes),
-%	string_codes(String,Codes).
+read_string(String):-
+	current_input(Input),
+	read_line_to_codes(Input,Codes),
+	string_codes(String,Codes).
 
 %%%
 % Predikat sa vykonava opakovane kym pouzivatel nezada korektne cislo
 % read_num(?Number) argument je velmi vhodne pouzivat len ako vystupny
 
-%read_num(Num) :-
-%	read_string(Str),
-%	number_string(Num, Str), !.
-%
-%read_num(Num) :-
-%	write('\tMusite zadat cislo: '),
-%	read_num(Num).
+read_num(Num) :-
+	read_string(Str),
+	number_string(Num, Str), !.
+
+read_num(Num) :-
+	write('\tMusite zadat cislo: '),
+	read_num(Num).
 %
 
 %%%
 % Konverzia retazca na atom
 % read_atom(?Atom)
 
-%read_atom(A):-
-%	read_string(Str),
-%	atom_string(A,Str).
+read_atom(A):-
+	read_string(Str),
+	atom_string(A,Str).
 %
 %%%
 % Najde vsetky riesenia pre dany ciel
