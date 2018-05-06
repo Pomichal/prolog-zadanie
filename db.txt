@@ -1,4 +1,5 @@
 system("pocitac",["pocitacova jednotka"],["monitor","klavesnica"]).
+system("game-set",["pocitacova jednotka"],["disk","monitor"]).
 
 podsystem("pocitacova jednotka",["disk","disk"]).
 

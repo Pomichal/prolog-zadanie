@@ -32,7 +32,7 @@ menu:-
 	nl,
 	writeln('1 - citanie zo suboru'),
 	writeln('2 - zapis do suboru'),
-	writeln('3 - vypis vsetkych zakaznikov'),
+	writeln('3 - vypis vsetkych systemov'),
 	writeln('9 - koniec prace systemu'),
 	writeln('------------------------'),
 	nl.
@@ -43,7 +43,7 @@ menu:-
 
 vykonaj(49):-citaj,!.
 vykonaj(50):-zapis,!. %ocakava sa vlozenie mena suboru!
-%vykonaj(51):-vypis,!.
+vykonaj(51):-vypis,!.
 vykonaj(57):-!.
 vykonaj(_):-writeln('Pouzivaj len urcene znaky!').
 
@@ -90,18 +90,47 @@ zapis:-told.
 % Sluzi na vypis
 % vypis()
 
-%vypis:-
-%	zakaznik(Meno,Priezvisko,Adresa,Objednavka),
-%	write(Meno),
-%	write(", "),
-%	write(Priezvisko),
-%	write(", "),
-%	write(Adresa),
-%	write(", "),
-%	writeln(Objednavka),
-%	fail.
-%vypis.
+vypis:-
+	system(Meno,Podsystemy,Suciastky),
+	writeln(Meno),
+	suciastky_vypis(Suciastky),
+	podsystemy_vypis(Podsystemy),	
+	fail.
+vypis.
 
+podsystemy_vypis([H|T]):-
+	vypis_podsystem(H),
+	podsystemy_vypis(T),
+	!.
+
+podsystemy_vypis(_):- !.
+
+vypis_podsystem(Meno):-
+	podsystem(Meno,Suciastky),
+	writeln(""),	
+	writeln(Meno),
+	suciastky_vypis(Suciastky),
+	!.
+
+vypis_podsystem(_):-!.
+
+suciastky_vypis([H|T]):-
+	vypis_suciastku(H),
+	suciastky_vypis(T),
+	!.
+
+suciastky_vypis(_):-!.
+
+vypis_suciastku(Meno):-
+	suciastka(Meno,Cena),
+	write(Meno),
+	write(", cena: "),
+	write(Cena),
+	write(", "),
+	!.
+
+vypis_suciastku(_):-!.
+	
 
 
 
