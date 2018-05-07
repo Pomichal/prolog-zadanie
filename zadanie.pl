@@ -18,6 +18,7 @@
 % main()
 
 main:-	        %uz pri spusteni moze nacitat databazu
+	citaj('db.txt'),
 	repeat,
 	menu,
 	get(C),
@@ -35,6 +36,7 @@ menu:-
 	writeln('1 - citanie zo suboru'),
 	writeln('2 - ulozenie dat do suboru'),
 	writeln('3 - moznosti vypisu'),
+	writeln('4 - moznosti tvorby zaznamov'),
 	writeln('9 - koniec prace systemu'),
 	writeln('------------------------'),
 	nl.
@@ -45,14 +47,18 @@ menu:-
 
 vykonaj(49):-
 	read_string(_),
-	citaj,
+	writeln("Subor: "),
+	read_atom(Subor),
+	citaj(Subor),
 	!.
 vykonaj(50):-
+	read_string(_),
 	writeln("Subor: "),
 	read_atom(Subor),
 	uloz(Subor),
 	!.
 vykonaj(51):-vypis_main,!.
+vykonaj(52):-vytvor_main,!.
 vykonaj(57):-!.
 vykonaj(_):-writeln('Pouzivaj len urcene znaky!').
 
@@ -61,9 +67,7 @@ vykonaj(_):-writeln('Pouzivaj len urcene znaky!').
 % Sluzi na citanie zo suboru, najprv vyprazdni existujucu DB.
 % citaj(+Subor)
 
-citaj:-
-	writeln("Subor: "),
-	read_atom(Subor),
+citaj(Subor):-
 	abolish(system/1),
 	abolish(suciastka/2),
 	abolish(vztah/3),
@@ -80,8 +84,8 @@ citaj:-
 	).
 
 %%%
-% Sluzi na zapis textoveho suboru.
-% zapis(+Subor)
+% Sluzi na zapis do textoveho suboru.
+% uloz(+Subor)
 
 uloz(Subor):-
 	tell(Subor),
@@ -114,8 +118,53 @@ uloz_vztahy:-
 	fail.
 uloz_vztahy.
 
-	
+%%%%%%%%
+%tvorba noveho zaznamu
 
+vytvor_main:-
+	repeat,
+	vytvor_menu,
+	get(C),
+	vykonaj_vytvor(C),
+	C == 57.
+
+vytvor_menu:-
+	nl,
+	writeln("VYTVOR MENU"),
+	writeln('1 - vytvor novy system'),
+	writeln('2 - pridaj podsystem k systemu'),
+	writeln('3 - pridaj suciastku k systemu/podsystemu'),
+	writeln('9 - navrat do hlavneho menu'),
+	writeln('------------------------'),
+	nl.
+
+vykonaj_vytvor(49):- vytvor_system,!.
+vykonaj_vytvor(50):- pridaj_podsystem,!.
+vykonaj_vytvor(51):- pridaj_suciastku,!.
+vykonaj_vytvor(57):-!.
+vykonaj_vytvor(_):-writeln('Pouzivaj len urcene znaky!').
+	
+vytvor_system:-
+	write("Meno systemu: "),
+	read_string(Meno),
+	assertz(system(Meno)).
+
+pridaj_podsystem():-
+	writeln("Meno systemu: "),
+	read_string(Meno),
+	system(Meno),
+	writeln("Meno podsystemu: "),
+	read_string(Meno1),
+	(
+	system(Meno1)
+	;
+	assertz(system(Meno1))
+	),
+	writeln("mnozstvo:"),
+	read_number(Mnozstvo),
+	assertz(vztah(Meno,Meno1,Mnozstvo)),
+	writeln("udaje boli zaevidovane").
+	
 %po case zapis
 %write(daco),
 %read_string(Meno),
