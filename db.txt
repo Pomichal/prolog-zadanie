@@ -1,8 +1,16 @@
-system("pocitac",["pocitacova jednotka"],["monitor","klavesnica"]).
-system("game-set",["pocitacova jednotka"],["disk","monitor"]).
+system("pocitac").
+system("game-set").
 
-podsystem("pocitacova jednotka",["disk","disk"]).
+system("pocitacova jednotka").
 
 suciastka("monitor",10).
 suciastka("klavesnica",5).
 suciastka("disk",12).
+
+vztah("pocitac","pocitacova jednotka",1).
+vztah("pocitac","monitor",1).
+vztah("pocitac","klavesnica",1).
+vztah("pocitacova jednotka","disk",2).
+vztah("pocitacova jednotka", "monitor",1).
+vztah("game-set","monitor",2).
+vztah("game-set","pocitacova jednotka",2).
