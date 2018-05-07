@@ -23,6 +23,7 @@ main:-	        %uz pri spusteni moze nacitat databazu
 	get(C),
 	vykonaj(C),
 	C == 57,
+	uloz('db.txt'),
 	writeln('Koniec prace.').
 
 %%%
@@ -32,7 +33,7 @@ menu:-
 	nl,
 	writeln("HLAVNE MENU"),
 	writeln('1 - citanie zo suboru'),
-	writeln('2 - zapis do suboru'),
+	writeln('2 - ulozenie dat do suboru'),
 	writeln('3 - moznosti vypisu'),
 	writeln('9 - koniec prace systemu'),
 	writeln('------------------------'),
@@ -47,8 +48,9 @@ vykonaj(49):-
 	citaj,
 	!.
 vykonaj(50):-
-	read_string(_),
-	zapis,
+	writeln("Subor: "),
+	read_atom(Subor),
+	uloz(Subor),
 	!.
 vykonaj(51):-vypis_main,!.
 vykonaj(57):-!.
@@ -81,16 +83,44 @@ citaj:-
 % Sluzi na zapis textoveho suboru.
 % zapis(+Subor)
 
-zapis:-
-	writeln("Subor: "),
-	read_atom(Subor),
+uloz(Subor):-
 	tell(Subor),
-	system(Meno,[Podsystemy],[Suciastky]),
-	writeq(system(Meno,[Podsystemy],[Suciastky])),
+	uloz_systemy,
+	uloz_suciastky,
+	uloz_vztahy,
+	told.
+
+uloz_systemy:-
+	system(Meno),
+	writeq(system(Meno)), %uloz na konci, tri typy
 	write('.'),
 	nl,
 	fail.
-zapis:-told.
+uloz_systemy.
+
+uloz_suciastky:-
+	suciastka(Meno,Cena),
+	writeq(suciastka(Meno,Cena)), %uloz na konci, tri typy
+	write('.'),
+	nl,
+	fail.
+uloz_suciastky.
+
+uloz_vztahy:-
+	vztah(Meno1,Meno2,Mnozstvo),
+	writeq(vztah(Meno1,Meno2,Mnozstvo)),
+	write('.'),
+	nl,
+	fail.
+uloz_vztahy.
+
+	
+
+%po case zapis
+%write(daco),
+%read_string(Meno),
+%POcet
+%assertz(system(Meno)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Sluzi na vypis
