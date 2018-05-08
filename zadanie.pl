@@ -1,25 +1,23 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Mame predikat zakaznik so styrmi argumentami a potrebujeme
-% povedat prologu, ze sa pocet jeho klauzul moze menit.
-% zakaznik(Meno,Priezvisko,Adresa,Objednavka)
+% Autor: Vajk Pomichal
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Program pracuje s predikatmi system(Meno), suciastka(Meno,CenaZaKus)
+% a vztah(System,System,Mnozstvo) alebo vztah(System,Suciastka,Mnozstvo)
+% systemy mozu byt usporiadane hierarchicky
 
 :- dynamic system/1.
 :- dynamic suciastka/2.
 :- dynamic vztah/3.
 
-%%%
-% zadefinujeme operatory - len priklad
-
-%:- op(800,xfy,::).
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Hlavny cyklus programu
 % main()
 
-main:-	        %uz pri spusteni moze nacitat databazu
+main:-	        %uz pri spusteni nacita databazu zo suboru db.txt
 	citaj('db.txt'),
-	repeat,
+	repeat,		%hlavny cyklus
 	menu,
 	get(C),
 	vykonaj(C),
@@ -28,8 +26,8 @@ main:-	        %uz pri spusteni moze nacitat databazu
 	writeln('Koniec prace.').
 
 %%%
-% Menu rozsirite podla zadania
-% menu
+% hlavne menu
+% menu()
 menu:-
 	nl,
 	writeln("HLAVNE MENU"),
@@ -42,23 +40,23 @@ menu:-
 	nl.
 
 %%%
-% vykonanie vybranej moznosti
+% vykonanie vybranej moznosti z hlavnej menu
 % vykonaj(+Code)
 
-vykonaj(49):-
+vykonaj(49):-			% nacita subor, z ktoreho sa ma nacitat databaza
 	read_string(_),
 	writeln("Subor: "),
 	read_atom(Subor),
 	citaj(Subor),
 	!.
-vykonaj(50):-
+vykonaj(50):-			% nacita subor, kam sa maju udaje zapisat
 	read_string(_),
 	writeln("Subor: "),
 	read_atom(Subor),
 	uloz(Subor),
 	!.
-vykonaj(51):-vypis_main,!.
-vykonaj(52):-vytvor_main,!.
+vykonaj(51):-vypis_main,!.	% vstupi do menu pre vypis
+vykonaj(52):-vytvor_main,!.	% vstupi do menu pre tvorbu zaznamov
 vykonaj(57):-!.
 vykonaj(_):-writeln('Pouzivaj len urcene znaky!').
 
@@ -83,7 +81,7 @@ citaj(Subor):-
 	    fail
 	).
 
-%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Sluzi na zapis do textoveho suboru.
 % uloz(+Subor)
 
@@ -94,6 +92,8 @@ uloz(Subor):-
 	uloz_vztahy,
 	told.
 
+% sluzi na zapis systemov do suboru
+% uloz_systemy()
 uloz_systemy:-
 	system(Meno),
 	writeq(system(Meno)), %uloz na konci, tri typy
@@ -102,6 +102,8 @@ uloz_systemy:-
 	fail.
 uloz_systemy.
 
+% sluzi na zapis suciastok do suboru
+% uloz_suciastky()
 uloz_suciastky:-
 	suciastka(Meno,Cena),
 	writeq(suciastka(Meno,Cena)), %uloz na konci, tri typy
@@ -110,6 +112,8 @@ uloz_suciastky:-
 	fail.
 uloz_suciastky.
 
+% sluzi na zapis vztahov do suboru
+%uloz_vztahy()
 uloz_vztahy:-
 	vztah(Meno1,Meno2,Mnozstvo),
 	writeq(vztah(Meno1,Meno2,Mnozstvo)),
@@ -118,9 +122,10 @@ uloz_vztahy:-
 	fail.
 uloz_vztahy.
 
-%%%%%%%%
-%tvorba noveho zaznamu
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% tvorba noveho zaznamu
+% hlavny cyklus pre tvorbu zaznamov
+% vytvor_main()
 vytvor_main:-
 	repeat,
 	vytvor_menu,
@@ -128,6 +133,8 @@ vytvor_main:-
 	vykonaj_vytvor(C),
 	C == 57.
 
+% menu pre tvorbu zaznamov
+%vytvor_menu()
 vytvor_menu:-
 	nl,
 	writeln("VYTVOR MENU"),
@@ -138,20 +145,33 @@ vytvor_menu:-
 	writeln('------------------------'),
 	nl.
 
-vykonaj_vytvor(49):- vytvor_system,!.
-vykonaj_vytvor(50):- pridaj_podsystem,!.
-vykonaj_vytvor(51):- pridaj_suciastku,!.
+%vykonanie vybranej moznosti z menu zapisov
+% vykonaj_vytvor(+Code)
+vykonaj_vytvor(49):- 
+	read_string(_),
+	vytvor_system,!.
+vykonaj_vytvor(50):- 
+	read_string(_),
+	pridaj_podsystem,!.
+vykonaj_vytvor(51):- 
+	read_string(_),
+	pridaj_suciastku,!.
 vykonaj_vytvor(57):-!.
 vykonaj_vytvor(_):-writeln('Pouzivaj len urcene znaky!').
 	
+%vytvori novy system
+%vytvor_system()
 vytvor_system:-
-	write("Meno systemu: "),
+	writeln("Meno systemu: "),
 	read_string(Meno),
 	assertz(system(Meno)).
 
+% prida alebo vytvori novy podsystem k danemu systemu
+% pridaj_podsystem()
 pridaj_podsystem():-
 	writeln("Meno systemu: "),
 	read_string(Meno),
+	(
 	system(Meno),
 	writeln("Meno podsystemu: "),
 	read_string(Meno1),
@@ -161,20 +181,41 @@ pridaj_podsystem():-
 	assertz(system(Meno1))
 	),
 	writeln("mnozstvo:"),
-	read_number(Mnozstvo),
+	read_num(Mnozstvo),
 	assertz(vztah(Meno,Meno1,Mnozstvo)),
-	writeln("udaje boli zaevidovane").
+	writeln("udaje boli zaevidovane")
+	;
+	writeln("system so zadanym menom neexistuje")
+	).
 	
-%po case zapis
-%write(daco),
-%read_string(Meno),
-%POcet
-%assertz(system(Meno)).
-
+% prida alebo vytvori suciastku k danemu systemu
+% pridaj_suciastku()
+pridaj_suciastku:-
+	writeln("Meno systemu: "),
+	read_string(Meno),
+	(
+	system(Meno),
+	writeln("Meno suciastky: "),
+	read_string(Meno1),
+	(
+	suciastka(Meno1,_)
+	;
+	writeln("Cena za kus: "),
+	read_num(Cena),
+	assertz(suciastka(Meno1,Cena))
+	),
+	writeln("mnozstvo:"),
+	read_num(Mnozstvo),
+	assertz(vztah(Meno,Meno1,Mnozstvo)),
+	writeln("udaje boli zaevidovane")
+	;
+	writeln("system so zadanym menom neexistuje")
+	).
+	
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Sluzi na vypis
-% vypis()
-
+% moznosti vypisu
+% hlavny cyklus pre vypis
+% vypis_main()
 vypis_main:-
 	repeat,
 	vypis_menu,
@@ -182,6 +223,8 @@ vypis_main:-
 	vykonaj_vypis(C),
 	C == 57.
 
+% menu pre vypis
+% vypis_menu()
 vypis_menu:-
 	nl,
 	writeln("VYPIS MENU"),
@@ -192,21 +235,24 @@ vypis_menu:-
 	writeln('------------------------'),
 	nl.
 
+% vykonanie vybranej moznosti z menu vypisov
+% vykonaj_vypis(+Code)
 vykonaj_vypis(49):- vypis,!.
 vykonaj_vypis(50):- najdi_system,!.
 vykonaj_vypis(51):- najdi_suciastku,!.
 vykonaj_vypis(57):-!.
 vykonaj_vypis(_):-writeln('Pouzivaj len urcene znaky!').
 	
-%%%%%%%%%
-%vypis celeho stromu
-
+% vypis kazdeho systemu a jeho podsystemov a suciastok
+% vypis()
 vypis:-
 	system(Meno),
 	vypis_system(Meno),
 	fail.
 vypis.
 
+% vypis jedneho systemu a jeho podsystemov a suciastok
+% vypis_system(+MenoSystemu)
 vypis_system(Meno):-
 	writeln("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"),
 	write(Meno),
@@ -217,6 +263,8 @@ vypis_system(Meno):-
 	vypis_cast(Cast, Mnozstvo),
 	fail.
 
+% vypocita cenu systemu
+% cena_systemu(+MenoSystemu,?Cena)
 cena_systemu(Meno,Cena):-
 	findall(Cast,(vztah(Meno,Cast,_), suciastka(Cast,_)),Zoz),
 	cena_suciastok(Meno,Zoz,Cena1),
@@ -224,6 +272,8 @@ cena_systemu(Meno,Cena):-
 	cena_podsystemov(Meno,Zoz1,Cena2),
 	Cena is Cena1 + Cena2.
 
+% vypocita cenu podsystemov systemu
+% cena_podsystemov(+MenoSystemu, +ZoznamPodsystemov, ?Cena)
 cena_podsystemov(Meno,[H|T],Cena):-
 	vztah(Meno,H,Mnozstvo),	
 	cena_systemu(H,Cena1),
@@ -231,6 +281,8 @@ cena_podsystemov(Meno,[H|T],Cena):-
 	Cena is Cena2 + Cena1 * Mnozstvo.
 cena_podsystemov(_,[],0).
 
+% vypocita cenu suciastok priamo podradene systemu
+% cena_suciastok(+MenoSystemu, +ZoznamSuciastok, ?Cena)
 cena_suciastok(Meno,[H|T],Cena):-
 	suciastka(H,Hodnota),
 	vztah(Meno,H,Mnozstvo),
@@ -238,6 +290,8 @@ cena_suciastok(Meno,[H|T],Cena):-
 	Cena is Cena1 + Hodnota * Mnozstvo.
 cena_suciastok(_,[],0).
 
+% vypise cast systemu (podsystem alebo suciastku)
+% vypis_cast(+Meno,+Mnozstvo)
 vypis_cast(Meno, Mnozstvo):-
 	(
 	system(Meno),
@@ -259,10 +313,8 @@ vypis_cast(Meno, Mnozstvo):-
 	writeln("")
 	).	
 
-
-%%%%
-%najdi a vypis detaily o systeme
-
+% najde a vypise detaily o vybranom systeme
+% najdi_system()
 najdi_system:-
 	read_atom(_),
 	writeln("Zadaj meno systemu: "),
@@ -272,8 +324,8 @@ najdi_system:-
 
 najdi_system.
 
-%%%
-%najdi a vypis detaily o suciastke
+% najde a vypise detaily o vybranej suciastke
+% najdi_suciastku()
 najdi_suciastku:-
 	read_atom(_),
 	writeln("Zadaj meno suciastky: "),
@@ -287,7 +339,7 @@ najdi_suciastku.
 	
  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Pomocne predikaty - priklady
+% Pomocne predikaty
 % Predikat, ktory nacita string aj ked tam je velke zaciatocne pismeno
 % read_string(?String) argument je ale vhodnejsie pouzivat ako vystupny
 
@@ -296,7 +348,6 @@ read_string(String):-
 	read_line_to_codes(Input,Codes),
 	string_codes(String,Codes).
 
-%%%
 % Predikat sa vykonava opakovane kym pouzivatel nezada korektne cislo
 % read_num(?Number) argument je velmi vhodne pouzivat len ako vystupny
 
@@ -307,19 +358,10 @@ read_num(Num) :-
 read_num(Num) :-
 	write('\tMusite zadat cislo: '),
 	read_num(Num).
-%
 
-%%%
 % Konverzia retazca na atom
 % read_atom(?Atom)
 
 read_atom(A):-
 	read_string(Str),
 	atom_string(A,Str).
-%
-%%%
-% Najde vsetky riesenia pre dany ciel
-% findall(+Template, :Goal, -Bag)
-% vrati zoznam Mien a Priezvisk pre vsetkych zakaznikov v databaze
-% findall(M^P , zakaznik(M,P,A,O), List).
-% findall(M-P-A>O,zakaznik(M,P,A,O),List).
